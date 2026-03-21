@@ -207,11 +207,13 @@ const { config, currentPath } = Astro.props;
 		function open() {
 			overlay?.classList.remove("hidden");
 			menu?.classList.remove("translate-x-full");
+			document.body.style.overflow = "hidden";
 		}
 
 		function shut() {
 			overlay?.classList.add("hidden");
 			menu?.classList.add("translate-x-full");
+			document.body.style.overflow = "";
 		}
 
 		toggle?.addEventListener("click", open);
