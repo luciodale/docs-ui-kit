@@ -1,6 +1,6 @@
 # @luciodale/docs-ui-kit
 
-Astro component library for building documentation sites. Dark theme, orange accent, Tailwind CSS v4. Ships source `.astro` files — no build step in the library, your Astro project processes them.
+Astro component library for building documentation sites. Dark theme, orange accent, Tailwind CSS v4. Ships source `.astro` files and pre-compiled Tailwind utilities — your Astro project processes the components, the CSS works everywhere without `@source` hacks.
 
 ## Install
 
@@ -16,18 +16,25 @@ Runtime dependency: `shiki` (build-time syntax highlighting in Astro frontmatter
 
 ### 1. CSS
 
-Create a global CSS file and import the theme + tell Tailwind to scan the library's components:
+Create a global CSS file and import the theme + pre-compiled utilities:
 
 ```css
 /* src/styles/global.css */
 @import "tailwindcss";
 @import "@luciodale/docs-ui-kit/styles.css";
-
-/* Adjust the path to wherever node_modules lives relative to this file */
-@source "../../node_modules/@luciodale/docs-ui-kit/src";
+@import "@luciodale/docs-ui-kit/utilities.css";
 ```
 
-The theme CSS defines Tailwind v4 `@theme` tokens (colors, fonts) and base body styles (`background: black; color: white`). It also provides a `.liquid-glass-border` utility class.
+- `styles.css` — Tailwind v4 `@theme` tokens (colors, fonts), base body styles (`background: black; color: white`), and custom utilities like `.liquid-glass-border`
+- `utilities.css` — Pre-compiled Tailwind utility classes used by all components (navbar, sidebar, code blocks, etc.). Ships with the package so you don't need `@source` directives pointing into `node_modules`
+
+Then import this CSS in your base layout's frontmatter (not a `<style>` tag):
+
+```astro
+---
+import "../styles/global.css";
+---
+```
 
 ### 2. Fonts
 
@@ -490,6 +497,7 @@ import LinkedInIcon from "@luciodale/docs-ui-kit/components/LinkedInIcon.astro";
 // src/layouts/Base.astro
 import SEO from "@luciodale/docs-ui-kit/components/SEO.astro";
 import { siteConfig } from "../config";
+import "../styles/global.css";
 
 type Props = { title: string; description?: string; type?: "website" | "article" };
 
@@ -512,10 +520,6 @@ const { title, description, type = "website" } = Astro.props;
     <slot />
   </body>
 </html>
-
-<style is:global>
-  @import "../styles/global.css";
-</style>
 ```
 
 ### Docs layout wrapper (create in your project)
