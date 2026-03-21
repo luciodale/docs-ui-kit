@@ -1,0 +1,92 @@
+---
+type Props = {
+	packageName: string;
+	githubRepo?: string;
+};
+
+const { packageName, githubRepo } = Astro.props;
+
+type NpmData = { version: string; license: string };
+type GithubData = { stars: number };
+
+async function fetchNpm(): Promise<NpmData | null> {
+	try {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 3000);
+		const res = await fetch(`https://registry.npmjs.org/${packageName}/latest`, {
+			signal: controller.signal,
+		});
+		clearTimeout(timeout);
+		if (!res.ok) return null;
+		const data = await res.json();
+		return { version: data.version, license: data.license ?? "" };
+	} catch {
+		return null;
+	}
+}
+
+async function fetchGithub(): Promise<GithubData | null> {
+	if (!githubRepo) return null;
+	try {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 3000);
+		const res = await fetch(`https://api.github.com/repos/${githubRepo}`, {
+			signal: controller.signal,
+			headers: { Accept: "application/vnd.github.v3+json" },
+		});
+		clearTimeout(timeout);
+		if (!res.ok) return null;
+		const data = await res.json();
+		return { stars: data.stargazers_count ?? 0 };
+	} catch {
+		return null;
+	}
+}
+
+const [npm, github] = await Promise.all([fetchNpm(), fetchGithub()]);
+---
+
+<div class="flex items-center gap-3 flex-wrap text-xs font-mono my-4">
+	{npm?.version && (
+		<a
+			href={`https://www.npmjs.com/package/${packageName}`}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-accent hover:bg-white/[0.06] transition-colors"
+		>
+			<svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+				<path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.332h-2.669v-.001zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.671V8.667h8.002v5.331zM10.665 10H12v2.667h-1.335V10z" />
+			</svg>
+			v{npm.version}
+		</a>
+	)}
+	{npm?.license && (
+		<span class="inline-flex items-center rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-white/60">
+			{npm.license}
+		</span>
+	)}
+	{github && github.stars > 0 && (
+		<a
+			href={`https://github.com/${githubRepo}`}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-white/60 hover:bg-white/[0.06] transition-colors"
+		>
+			<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+				<path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279L12 19.771l-7.416 3.642 1.48-8.279L0 9.306l8.332-1.151z" />
+			</svg>
+			{github.stars.toLocaleString()}
+		</a>
+	)}
+	<a
+		href={`https://bundlephobia.com/package/${packageName}${npm?.version ? `@${npm.version}` : ""}`}
+		target="_blank"
+		rel="noopener noreferrer"
+		class="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-white/60 hover:bg-white/[0.06] transition-colors"
+	>
+		<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+			<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+		</svg>
+		bundlephobia
+	</a>
+</div>

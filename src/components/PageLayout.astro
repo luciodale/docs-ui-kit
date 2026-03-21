@@ -1,0 +1,20 @@
+---
+import type { SiteConfig } from "../types/config";
+import Footer from "./Footer.astro";
+import Navbar from "./Navbar.astro";
+
+type Props = {
+	config: SiteConfig;
+	currentPath: string;
+};
+
+const { config, currentPath } = Astro.props;
+---
+
+<div class="flex flex-col min-h-dvh">
+	<Navbar config={config} currentPath={currentPath} />
+	<main class="flex-1">
+		<slot />
+	</main>
+	<Footer config={config} />
+</div>

@@ -1,0 +1,59 @@
+---
+type Props = {
+	title: string;
+	description: string;
+	installCommand: string;
+	logoSrc?: string;
+	logoAlt?: string;
+};
+
+const { title, description, installCommand, logoSrc, logoAlt } = Astro.props;
+const hasExtra = Astro.slots.has("default");
+---
+
+<section class="flex flex-col items-center justify-center px-6 py-24 md:py-32 text-center max-w-3xl mx-auto">
+	{logoSrc && (
+		<img src={logoSrc} alt={logoAlt ?? title} class="w-20 h-20 md:w-24 md:h-24 mb-8" />
+	)}
+	<h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.1] mb-4">
+		{title}
+	</h1>
+	<p class="text-lg text-white/60 leading-relaxed max-w-xl mb-10">{description}</p>
+	<button
+		type="button"
+		class="copy-btn group rounded-lg border border-white/10 bg-white/5 hover:bg-white/[0.08] px-5 py-3 font-mono text-sm text-white/70 transition-colors cursor-pointer"
+		data-code={installCommand}
+	>
+		<span class="text-accent">$</span>
+		<span class="ml-2">{installCommand}</span>
+		<span class="ml-3 text-white/40 group-hover:text-white/60 transition-colors text-xs copy-label">
+			Copy
+		</span>
+	</button>
+	{hasExtra && (
+		<div class="mt-12">
+			<slot />
+		</div>
+	)}
+</section>
+
+<script>
+	function initCopyButtons() {
+		document.querySelectorAll(".copy-btn").forEach((btn) => {
+			if (btn.dataset.initialized) return;
+			btn.dataset.initialized = "true";
+			btn.addEventListener("click", async () => {
+				const code = btn.dataset.code;
+				if (!code) return;
+				await navigator.clipboard.writeText(code);
+				const label = btn.querySelector(".copy-label");
+				if (label) {
+					label.textContent = "Copied!";
+					setTimeout(() => { label.textContent = "Copy"; }, 2000);
+				}
+			});
+		});
+	}
+	initCopyButtons();
+	document.addEventListener("astro:after-swap", initCopyButtons);
+</script>

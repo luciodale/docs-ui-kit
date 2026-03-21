@@ -1,0 +1,54 @@
+---
+import { codeToHtml } from "shiki";
+
+type Props = {
+	code: string;
+	language?: string;
+	filename?: string;
+};
+
+const { code, language = "tsx", filename } = Astro.props;
+const trimmed = code.trim();
+const html = await codeToHtml(trimmed, {
+	lang: language,
+	theme: "vitesse-dark",
+});
+---
+
+<div class="rounded-lg border border-white/10 bg-[#161618] overflow-hidden my-4">
+	<div class="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] bg-white/[0.02]">
+		<span class="text-xs text-white/40 font-mono">{filename ?? language}</span>
+		<button
+			type="button"
+			class="copy-btn text-xs text-white/40 hover:text-white/70 transition-colors cursor-pointer"
+			data-code={trimmed}
+		>
+			<span class="copy-label">Copy</span>
+		</button>
+	</div>
+	<div
+		class="px-5 py-5 overflow-x-auto text-sm leading-[1.7] [&_pre]:!bg-transparent [&_pre]:!m-0 [&_pre]:!p-0"
+		set:html={html}
+	/>
+</div>
+
+<script>
+	function initCopyButtons() {
+		document.querySelectorAll(".copy-btn").forEach((btn) => {
+			if (btn.dataset.initialized) return;
+			btn.dataset.initialized = "true";
+			btn.addEventListener("click", async () => {
+				const code = btn.dataset.code;
+				if (!code) return;
+				await navigator.clipboard.writeText(code);
+				const label = btn.querySelector(".copy-label");
+				if (label) {
+					label.textContent = "Copied!";
+					setTimeout(() => { label.textContent = "Copy"; }, 2000);
+				}
+			});
+		});
+	}
+	initCopyButtons();
+	document.addEventListener("astro:after-swap", initCopyButtons);
+</script>

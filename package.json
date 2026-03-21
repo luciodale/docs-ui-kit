@@ -1,0 +1,46 @@
+{
+	"name": "@luciodale/docs-ui-kit",
+	"version": "0.2.1",
+	"description": "Astro component library for documentation sites. Dark theme, orange accent.",
+	"type": "module",
+	"exports": {
+		"./components/*": "./src/components/*",
+		"./types/config": "./src/types/config.ts",
+		"./types/props": "./src/types/props.ts",
+		"./styles.css": "./src/styles/theme.css"
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"format": "biome format --write .",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"npm": "npm publish --access public",
+		"npm:test": "npm pack --dry-run"
+	},
+	"peerDependencies": {
+		"astro": ">=5"
+	},
+	"dependencies": {
+		"shiki": "^4.0.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.7",
+		"astro": "^5.0.0",
+		"typescript": "^5.9.3"
+	},
+	"keywords": [
+		"astro",
+		"documentation",
+		"components",
+		"dark-theme",
+		"tailwindcss"
+	],
+	"author": "Lucio D'Alessandro",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/luciodale/docs-ui-kit"
+	}
+}

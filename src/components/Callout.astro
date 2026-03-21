@@ -1,0 +1,58 @@
+---
+import DangerIcon from "./icons/DangerIcon.astro";
+import InfoIcon from "./icons/InfoIcon.astro";
+import TipIcon from "./icons/TipIcon.astro";
+import WarningIcon from "./icons/WarningIcon.astro";
+
+type CalloutType = "info" | "warning" | "tip" | "danger";
+
+type Props = {
+	type?: CalloutType;
+	title?: string;
+};
+
+const { type = "info", title } = Astro.props;
+
+const styles: Record<CalloutType, { border: string; bg: string; text: string; defaultTitle: string }> = {
+	info: {
+		border: "border-blue-400/30",
+		bg: "bg-blue-400/5",
+		text: "text-blue-400",
+		defaultTitle: "Note",
+	},
+	warning: {
+		border: "border-yellow-400/30",
+		bg: "bg-yellow-400/5",
+		text: "text-yellow-400",
+		defaultTitle: "Warning",
+	},
+	tip: {
+		border: "border-green-400/30",
+		bg: "bg-green-400/5",
+		text: "text-green-400",
+		defaultTitle: "Tip",
+	},
+	danger: {
+		border: "border-red-400/30",
+		bg: "bg-red-400/5",
+		text: "text-red-400",
+		defaultTitle: "Danger",
+	},
+};
+
+const s = styles[type];
+const heading = title ?? s.defaultTitle;
+---
+
+<aside class:list={["rounded-lg border-l-4 px-5 py-4 my-6", s.border, s.bg]}>
+	<div class:list={["flex items-center gap-1.5 mb-2 text-sm font-semibold", s.text]}>
+		{type === "info" && <InfoIcon />}
+		{type === "warning" && <WarningIcon />}
+		{type === "tip" && <TipIcon />}
+		{type === "danger" && <DangerIcon />}
+		{heading}
+	</div>
+	<div class="text-sm text-white/70 leading-relaxed [&_a]:text-accent [&_a]:underline [&_code]:text-white/80 [&_code]:font-mono [&_code]:text-xs">
+		<slot />
+	</div>
+</aside>

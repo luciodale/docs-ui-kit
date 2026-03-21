@@ -1,0 +1,28 @@
+---
+import type { SiteConfig } from "../types/config";
+import Footer from "./Footer.astro";
+import Navbar from "./Navbar.astro";
+import Sidebar from "./Sidebar.astro";
+import TableOfContents from "./TableOfContents.astro";
+
+type Props = {
+	config: SiteConfig;
+	currentPath: string;
+};
+
+const { config, currentPath } = Astro.props;
+---
+
+<div class="flex flex-col min-h-dvh">
+	<Navbar config={config} currentPath={currentPath} />
+	<div class="flex flex-1">
+		<Sidebar sections={config.sidebarSections} currentPath={currentPath} />
+		<main class="flex-1 overflow-y-auto">
+			<div class="max-w-3xl px-6 md:px-8 xl:px-12 py-10 md:py-16">
+				<slot />
+			</div>
+		</main>
+		<TableOfContents />
+	</div>
+	<Footer config={config} />
+</div>

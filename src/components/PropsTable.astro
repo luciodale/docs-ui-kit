@@ -1,0 +1,45 @@
+---
+import type { PropsTableRow } from "../types/props";
+
+type Props = {
+	title?: string;
+	rows: Array<PropsTableRow>;
+};
+
+const { title, rows } = Astro.props;
+---
+
+<div class="my-6">
+	{title && <h3 class="text-lg font-semibold text-white mb-4">{title}</h3>}
+	<div class="rounded-lg border border-white/10 overflow-hidden">
+		<div class="overflow-x-auto">
+			<table class="w-full text-left text-sm">
+				<thead>
+					<tr class="border-b border-white/10 bg-white/[0.02]">
+						<th class="py-3 px-4 text-xs font-medium text-white/50 uppercase tracking-wider">Prop</th>
+						<th class="py-3 px-4 text-xs font-medium text-white/50 uppercase tracking-wider">Type</th>
+						<th class="py-3 px-4 text-xs font-medium text-white/50 uppercase tracking-wider">Default</th>
+						<th class="py-3 px-4 text-xs font-medium text-white/50 uppercase tracking-wider">Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					{rows.map((row) => (
+						<tr class="border-b border-white/[0.04] last:border-b-0">
+							<td class="py-3 px-4">
+								<code class="text-accent font-mono text-xs">{row.name}</code>
+								{row.required && <span class="ml-1 text-red-400 text-xs">*</span>}
+							</td>
+							<td class="py-3 px-4">
+								<code class="text-white/60 font-mono text-xs">{row.type}</code>
+							</td>
+							<td class="py-3 px-4 text-white/45 text-xs font-mono">
+								{row.defaultValue ?? "\u2014"}
+							</td>
+							<td class="py-3 px-4 text-white/70 text-sm">{row.description}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
