@@ -13,6 +13,12 @@ export type SidebarSection = {
 	links: Array<NavLink>;
 };
 
+export type ParentSite = {
+	href: string;
+	label: string;
+	logoSrc?: string;
+};
+
 export type SiteConfig = {
 	title: string;
 	description: string;
@@ -29,4 +35,5 @@ export type SiteConfig = {
 	navLinks: Array<NavLink>;
 	sidebarSections: Array<SidebarSection>;
 	copyright?: string;
+	parentSite?: ParentSite;
 };
