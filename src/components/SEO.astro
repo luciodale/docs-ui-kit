@@ -23,8 +23,9 @@ const {
 	noindex = false,
 } = Astro.props;
 
-const canonicalUrl = new URL(currentPath, config.siteUrl).href;
-const ogImageUrl = config.ogImage ? new URL(config.ogImage, config.siteUrl).href : undefined;
+const baseUrl = config.siteUrl.endsWith("/") ? config.siteUrl : `${config.siteUrl}/`;
+const canonicalUrl = new URL(currentPath.replace(/^\//, ""), baseUrl).href;
+const ogImageUrl = config.ogImage ? new URL(config.ogImage.replace(/^\//, ""), baseUrl).href : undefined;
 const fullTitle = currentPath === "/" ? title : `${title} | ${config.title}`;
 
 const jsonLd =
@@ -66,7 +67,7 @@ const breadcrumbs = currentPath === "/" ? null : {
 			"@type": "ListItem",
 			position: i + 1,
 			name: segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-			item: new URL(arr.slice(0, i + 1).join("/"), config.siteUrl).href,
+			item: new URL(arr.slice(0, i + 1).join("/"), baseUrl).href,
 		})),
 };
 
