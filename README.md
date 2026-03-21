@@ -621,6 +621,31 @@ export const prerender = true;
 
 React islands require `@astrojs/react` in your Astro project. The docs-ui-kit itself has zero React dependency.
 
+## OG Image Generator
+
+Generate a 1200x630 Open Graph preview image for link sharing (Slack, Twitter, Discord, etc.). Reads `public/logo.svg` for the logo and `installCommand` from `src/config.ts` for the npm package name. Outputs `public/og-image.png`.
+
+```bash
+bun run og-image <path-to-docs-site>
+```
+
+Example from the docs-ui-kit root:
+
+```bash
+bun run og-image ../react-socket/packages/docs
+```
+
+Then set `ogImage` in the docs site config:
+
+```ts
+export const siteConfig: SiteConfig = {
+  // ...
+  ogImage: "/og-image.png",
+};
+```
+
+The SEO component picks up `ogImage` and renders `og:image`, `og:image:width`, `og:image:height`, and `twitter:image` tags automatically.
+
 ## Color palette
 
 Defined in `theme.css` via Tailwind v4 `@theme` tokens:
