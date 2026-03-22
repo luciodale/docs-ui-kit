@@ -3,11 +3,12 @@ type Props = {
 	title: string;
 	description: string;
 	installCommand: string;
+	installPrefix?: string;
 	logoSrc?: string;
 	logoAlt?: string;
 };
 
-const { title, description, installCommand, logoSrc, logoAlt } = Astro.props;
+const { title, description, installCommand, installPrefix = "$", logoSrc, logoAlt } = Astro.props;
 const hasExtra = Astro.slots.has("default");
 ---
 
@@ -24,7 +25,7 @@ const hasExtra = Astro.slots.has("default");
 		class="copy-btn group rounded-lg border border-white/10 bg-white/5 hover:bg-white/[0.08] px-5 py-3 font-mono text-sm text-white/70 transition-colors cursor-pointer"
 		data-code={installCommand}
 	>
-		<span class="text-accent">$</span>
+		{installPrefix && <span class="text-accent">{installPrefix}</span>}
 		<span class="ml-2">{installCommand}</span>
 		<span class="ml-3 text-white/40 group-hover:text-white/60 transition-colors text-xs copy-label">
 			Copy

@@ -1,6 +1,7 @@
 ---
 import type { SidebarSection } from "../types/config";
 import { withBase } from "../utils/base-path";
+import { matchPath } from "../utils/match-path";
 
 type Props = {
 	section: SidebarSection;
@@ -28,7 +29,7 @@ const { section, currentPath } = Astro.props;
 				href={withBase(link.href)}
 				class:list={[
 					"block py-1.5 pl-3 text-sm border-l-2 transition-colors",
-					currentPath === link.href
+					matchPath(currentPath, link.href)
 						? "border-accent text-white font-medium"
 						: "border-transparent text-white/60 hover:text-white/90 hover:border-white/20",
 				]}

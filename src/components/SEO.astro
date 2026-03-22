@@ -1,5 +1,6 @@
 ---
 import type { SiteConfig } from "../types/config";
+import { stripBasePath, buildCanonicalUrl, buildBreadcrumbs } from "../utils/seo-urls";
 
 type Props = {
 	config: SiteConfig;
@@ -23,10 +24,13 @@ const {
 	noindex = false,
 } = Astro.props;
 
+const basePath = import.meta.env.BASE_URL ?? "/";
+const relativePath = stripBasePath(currentPath, basePath);
+
+const canonicalUrl = buildCanonicalUrl(relativePath, config.siteUrl);
 const baseUrl = config.siteUrl.endsWith("/") ? config.siteUrl : `${config.siteUrl}/`;
-const canonicalUrl = new URL(currentPath.replace(/^\//, ""), baseUrl).href;
 const ogImageUrl = config.ogImage ? new URL(config.ogImage.replace(/^\//, ""), baseUrl).href : undefined;
-const fullTitle = currentPath === "/" ? title : `${title} | ${config.title}`;
+const fullTitle = relativePath === "/" ? title : `${title} | ${config.title}`;
 
 const jsonLd =
 	type === "article"
@@ -57,19 +61,12 @@ const jsonLd =
 				description,
 			};
 
-const breadcrumbs = currentPath === "/" ? null : {
+const breadcrumbItems = buildBreadcrumbs(relativePath, config.siteUrl);
+const breadcrumbs = breadcrumbItems ? {
 	"@context": "https://schema.org",
 	"@type": "BreadcrumbList",
-	itemListElement: currentPath
-		.split("/")
-		.filter(Boolean)
-		.map((segment, i, arr) => ({
-			"@type": "ListItem",
-			position: i + 1,
-			name: segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-			item: new URL(arr.slice(0, i + 1).join("/"), baseUrl).href,
-		})),
-};
+	itemListElement: breadcrumbItems,
+} : null;
 
 const safeJsonLd = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 const safeBreadcrumbs = breadcrumbs ? JSON.stringify(breadcrumbs).replace(/</g, "\\u003c") : null;

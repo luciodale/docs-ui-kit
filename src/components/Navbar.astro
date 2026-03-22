@@ -1,6 +1,7 @@
 ---
 import type { SiteConfig } from "../types/config";
 import { withBase } from "../utils/base-path";
+import { matchPath } from "../utils/match-path";
 import GithubIcon from "./GithubIcon.astro";
 import SearchModal from "./SearchModal.astro";
 
@@ -45,7 +46,7 @@ const { config, currentPath } = Astro.props;
 					href={withBase(link.href)}
 					class:list={[
 						"text-sm font-medium transition-colors duration-150",
-						currentPath.startsWith(link.href)
+						matchPath(currentPath, link.href)
 							? "text-white"
 							: "text-white/60 hover:text-white/90",
 					]}
@@ -146,7 +147,7 @@ const { config, currentPath } = Astro.props;
 				href={withBase(link.href)}
 				class:list={[
 					"text-sm font-medium transition-colors",
-					currentPath.startsWith(link.href)
+					matchPath(currentPath, link.href)
 						? "text-white"
 						: "text-white/60 hover:text-white/90",
 				]}
@@ -169,7 +170,7 @@ const { config, currentPath } = Astro.props;
 								href={withBase(link.href)}
 								class:list={[
 									"block py-1.5 pl-3 text-sm border-l-2 transition-colors",
-									currentPath === link.href
+									matchPath(currentPath, link.href)
 										? "border-accent text-white font-medium"
 										: "border-transparent text-white/60 hover:text-white/90 hover:border-white/20",
 								]}
