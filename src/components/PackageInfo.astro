@@ -2,14 +2,15 @@
 type Props = {
 	packageName: string;
 	githubRepo?: string;
+	registry?: "npm" | "clojars";
 };
 
-const { packageName, githubRepo } = Astro.props;
+const { packageName, githubRepo, registry = "npm" } = Astro.props;
 
-type NpmData = { version: string; license: string };
+type PackageData = { version: string; license: string };
 type GithubData = { stars: number };
 
-async function fetchNpm(): Promise<NpmData | null> {
+async function fetchNpm(): Promise<PackageData | null> {
 	try {
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), 3000);
@@ -20,6 +21,23 @@ async function fetchNpm(): Promise<NpmData | null> {
 		if (!res.ok) return null;
 		const data = await res.json();
 		return { version: data.version, license: data.license ?? "" };
+	} catch {
+		return null;
+	}
+}
+
+async function fetchClojars(): Promise<PackageData | null> {
+	try {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 3000);
+		const res = await fetch(`https://clojars.org/api/artifacts/${packageName}`, {
+			signal: controller.signal,
+		});
+		clearTimeout(timeout);
+		if (!res.ok) return null;
+		const data = await res.json();
+		const license = data.licenses?.[0]?.name ?? "";
+		return { version: data.latest_release ?? data.latest_version ?? "", license };
 	} catch {
 		return null;
 	}
@@ -43,26 +61,38 @@ async function fetchGithub(): Promise<GithubData | null> {
 	}
 }
 
-const [npm, github] = await Promise.all([fetchNpm(), fetchGithub()]);
+const fetchPackage = registry === "clojars" ? fetchClojars : fetchNpm;
+const [pkg, github] = await Promise.all([fetchPackage(), fetchGithub()]);
+
+const isClojars = registry === "clojars";
+const packageUrl = isClojars
+	? `https://clojars.org/${packageName}`
+	: `https://www.npmjs.com/package/${packageName}`;
 ---
 
 <div class="flex items-center gap-3 flex-wrap text-xs font-mono my-4">
-	{npm?.version && (
+	{pkg?.version && (
 		<a
-			href={`https://www.npmjs.com/package/${packageName}`}
+			href={packageUrl}
 			target="_blank"
 			rel="noopener noreferrer"
 			class="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-accent hover:bg-white/[0.06] transition-colors"
 		>
-			<svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-				<path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.332h-2.669v-.001zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.671V8.667h8.002v5.331zM10.665 10H12v2.667h-1.335V10z" />
-			</svg>
-			v{npm.version}
+			{isClojars ? (
+				<svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+					<path d="M11.503 12.216c-.119.259-.251.549-.387.858-.482 1.092-1.016 2.42-1.21 3.271a4.91 4.91 0 0 0-.112 1.096c0 .164.009.337.022.514.682.25 1.417.388 2.186.39a6.39 6.39 0 0 0 2.001-.326 3.808 3.808 0 0 1-.418-.441c-.854-1.089-1.329-2.682-2.082-5.362M8.355 6.813A6.347 6.347 0 0 0 5.657 12a6.347 6.347 0 0 0 2.625 5.134c.39-1.622 1.366-3.107 2.83-6.084-.087-.239-.186-.5-.297-.775-.406-1.018-.991-2.198-1.513-2.733a4.272 4.272 0 0 0-.947-.729M17.527 19.277c-.84-.105-1.533-.232-2.141-.446A7.625 7.625 0 0 1 4.376 12a7.6 7.6 0 0 1 2.6-5.73 5.582 5.582 0 0 0-1.324-.162c-2.236.02-4.597 1.258-5.58 4.602-.092.486-.07.854-.07 1.29 0 6.627 5.373 12 12 12 4.059 0 7.643-2.017 9.815-5.101-1.174.293-2.305.433-3.271.436-.362 0-.702-.02-1.019-.058M15.273 16.952c.074.036.242.097.475.163a6.354 6.354 0 0 0 2.6-5.115h-.002a6.354 6.354 0 0 0-6.345-6.345 6.338 6.338 0 0 0-1.992.324c1.289 1.468 1.908 3.566 2.507 5.862l.001.003c.001.002.192.637.518 1.48.326.842.789 1.885 1.293 2.645.332.51.697.876.945.983M12.001 0a11.98 11.98 0 0 0-9.752 5.013c1.134-.71 2.291-.967 3.301-.957 1.394.004 2.491.436 3.017.732.127.073.248.152.366.233A7.625 7.625 0 0 1 19.625 12a7.605 7.605 0 0 1-2.268 5.425c.344.038.709.063 1.084.061 1.328 0 2.766-.293 3.842-1.198.703-.592 1.291-1.458 1.617-2.757.065-.502.1-1.012.1-1.531 0-6.627-5.371-12-11.999-12" />
+				</svg>
+			) : (
+				<svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+					<path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.332h-2.669v-.001zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.671V8.667h8.002v5.331zM10.665 10H12v2.667h-1.335V10z" />
+				</svg>
+			)}
+			v{pkg.version}
 		</a>
 	)}
-	{npm?.license && (
+	{pkg?.license && (
 		<span class="inline-flex items-center rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-white/60">
-			{npm.license}
+			{pkg.license}
 		</span>
 	)}
 	{github && github.stars > 0 && (
@@ -78,15 +108,17 @@ const [npm, github] = await Promise.all([fetchNpm(), fetchGithub()]);
 			{github.stars.toLocaleString()}
 		</a>
 	)}
-	<a
-		href={`https://bundlephobia.com/package/${packageName}${npm?.version ? `@${npm.version}` : ""}`}
-		target="_blank"
-		rel="noopener noreferrer"
-		class="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-white/60 hover:bg-white/[0.06] transition-colors"
-	>
-		<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-			<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-		</svg>
-		bundlephobia
-	</a>
+	{!isClojars && (
+		<a
+			href={`https://bundlephobia.com/package/${packageName}${pkg?.version ? `@${pkg.version}` : ""}`}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1 text-white/60 hover:bg-white/[0.06] transition-colors"
+		>
+			<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+				<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+			</svg>
+			bundlephobia
+		</a>
+	)}
 </div>
