@@ -176,6 +176,10 @@
 		return flat.slice(0, 10);
 	}
 
+	function ensureAbsolute(url: string): string {
+		return url.startsWith("/") ? url : `/${url}`;
+	}
+
 	function renderResults(items: PagefindResult[], query: string) {
 		const container = document.getElementById("search-results");
 		if (!container) return;
@@ -197,7 +201,7 @@
 		container.innerHTML = flat
 			.map(
 				(r) => `
-			<a href="${r.url}" style="display: block; border-radius: 0.5rem; padding: 0.625rem 0.75rem; transition: background-color 150ms; text-decoration: none;" onmouseenter="this.style.background='rgb(255 255 255 / 0.04)'" onmouseleave="this.style.background='transparent'" data-search-result>
+			<a href="${ensureAbsolute(r.url)}" style="display: block; border-radius: 0.5rem; padding: 0.625rem 0.75rem; transition: background-color 150ms; text-decoration: none;" onmouseenter="this.style.background='rgb(255 255 255 / 0.04)'" onmouseleave="this.style.background='transparent'" data-search-result>
 				<div style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.125rem;">
 					<span style="font-size: 0.875rem; font-weight: 500; color: rgb(255 255 255 / 0.8);">${r.title}</span>
 					${r.section ? `<span style="font-size: 11px; color: rgb(255 255 255 / 0.35);">${r.section}</span>` : ""}
