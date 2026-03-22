@@ -135,6 +135,7 @@
 	};
 
 	type PagefindAPI = {
+		options: (opts: Record<string, unknown>) => Promise<void>;
 		init: () => Promise<void>;
 		search: (query: string) => Promise<{ results: Array<{ data: () => Promise<PagefindResult> }> }>;
 	};
@@ -147,6 +148,7 @@
 			const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 			const path = `${base}/_pagefind/pagefind.js`;
 			pagefind = await import(/* @vite-ignore */ path) as PagefindAPI;
+			await pagefind.options({ baseUrl: "/" });
 			await pagefind.init();
 			return pagefind;
 		} catch {
