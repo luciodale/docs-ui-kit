@@ -1,0 +1,203 @@
+---
+type ComparisonStatus = "yes" | "no" | "partial";
+
+type ComparisonCell = ComparisonStatus | { text: string };
+
+type ComparisonRow = {
+	feature: string;
+	description?: string;
+	values: ComparisonCell[];
+};
+
+type ComparisonColumn = {
+	name: string;
+	href?: string;
+	tagline?: string;
+	highlight?: boolean;
+};
+
+type Props = {
+	columns: ComparisonColumn[];
+	rows: ComparisonRow[];
+	caption?: string;
+};
+
+const { columns, rows, caption } = Astro.props;
+
+function isStatus(cell: ComparisonCell): cell is ComparisonStatus {
+	return cell === "yes" || cell === "no" || cell === "partial";
+}
+
+const statusLabel: Record<ComparisonStatus, string> = {
+	yes: "Supported",
+	no: "Not supported",
+	partial: "Partial",
+};
+---
+
+<div class="my-8">
+	{caption && <p class="sr-only">{caption}</p>}
+
+	<div class="hidden md:block rounded-lg border border-white/10 overflow-hidden">
+		<table class="w-full text-left text-sm border-collapse table-fixed">
+			<thead>
+				<tr class="border-b border-white/10 bg-white/[0.02]">
+					<th scope="col" class="py-4 px-5 text-xs font-medium text-white/50 uppercase tracking-wider align-bottom">
+						Feature
+					</th>
+					{columns.map((col) => (
+						<th
+							scope="col"
+							class:list={[
+								"py-4 px-5 align-bottom",
+								col.highlight && "bg-accent/[0.06]",
+							]}
+						>
+							<div class="flex flex-col gap-1">
+								{col.href ? (
+									<a
+										href={col.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										class:list={[
+											"font-mono text-sm hover:underline",
+											col.highlight ? "text-accent" : "text-white/80",
+										]}
+									>
+										{col.name}
+									</a>
+								) : (
+									<span class:list={["font-mono text-sm", col.highlight ? "text-accent" : "text-white/80"]}>
+										{col.name}
+									</span>
+								)}
+								{col.tagline && (
+									<span class="text-xs font-normal text-white/45 normal-case tracking-normal">
+										{col.tagline}
+									</span>
+								)}
+							</div>
+						</th>
+					))}
+				</tr>
+			</thead>
+			<tbody>
+				{rows.map((row) => (
+					<tr class="border-b border-white/[0.04] last:border-b-0">
+						<th scope="row" class="py-3 px-5 align-top font-normal">
+							<span class="text-white/85 text-sm">{row.feature}</span>
+							{row.description && (
+								<span class="block text-xs text-white/45 mt-1 leading-relaxed">
+									{row.description}
+								</span>
+							)}
+						</th>
+						{row.values.map((cell, idx) => {
+							const col = columns[idx];
+							return (
+								<td class:list={["py-3 px-5 align-top", col?.highlight && "bg-accent/[0.04]"]}>
+									{isStatus(cell) ? (
+										cell === "yes" ? (
+											<span class="inline-flex items-center gap-2 text-accent" title={statusLabel.yes}>
+												<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M20 6L9 17l-5-5" />
+												</svg>
+												<span class="sr-only">{statusLabel.yes}</span>
+											</span>
+										) : cell === "no" ? (
+											<span class="inline-flex items-center gap-2 text-white/30" title={statusLabel.no}>
+												<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M6 18L18 6M6 6l12 12" />
+												</svg>
+												<span class="sr-only">{statusLabel.no}</span>
+											</span>
+										) : (
+											<span class="inline-flex items-center gap-2 text-yellow-400" title={statusLabel.partial}>
+												<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M5 12h14" />
+												</svg>
+												<span class="sr-only">{statusLabel.partial}</span>
+											</span>
+										)
+									) : (
+										<span class="text-white/75 text-sm leading-relaxed">{cell.text}</span>
+									)}
+								</td>
+							);
+						})}
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="md:hidden flex flex-col gap-4">
+		{columns.map((col, colIdx) => (
+			<div
+				class:list={[
+					"rounded-lg border p-5",
+					col.highlight ? "border-accent/30 bg-accent/[0.04]" : "border-white/10 bg-white/[0.02]",
+				]}
+			>
+				<div class="flex flex-col gap-1 mb-4 pb-3 border-b border-white/10">
+					{col.href ? (
+						<a
+							href={col.href}
+							target="_blank"
+							rel="noopener noreferrer"
+							class:list={[
+								"font-mono text-sm font-semibold",
+								col.highlight ? "text-accent" : "text-white/85",
+							]}
+						>
+							{col.name}
+						</a>
+					) : (
+						<span class:list={["font-mono text-sm font-semibold", col.highlight ? "text-accent" : "text-white/85"]}>
+							{col.name}
+						</span>
+					)}
+					{col.tagline && <span class="text-xs text-white/45">{col.tagline}</span>}
+				</div>
+				<dl class="flex flex-col gap-3">
+					{rows.map((row) => {
+						const cell = row.values[colIdx];
+						return (
+							<div class="flex items-start justify-between gap-4">
+								<dt class="text-sm text-white/70 flex-1">{row.feature}</dt>
+								<dd class="flex-shrink-0">
+									{cell !== undefined && isStatus(cell) ? (
+										cell === "yes" ? (
+											<span class="inline-flex items-center gap-1.5 text-accent text-xs font-medium">
+												<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M20 6L9 17l-5-5" />
+												</svg>
+												Yes
+											</span>
+										) : cell === "no" ? (
+											<span class="inline-flex items-center gap-1.5 text-white/35 text-xs">
+												<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M6 18L18 6M6 6l12 12" />
+												</svg>
+												No
+											</span>
+										) : (
+											<span class="inline-flex items-center gap-1.5 text-yellow-400 text-xs font-medium">
+												<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M5 12h14" />
+												</svg>
+												Partial
+											</span>
+										)
+									) : cell !== undefined ? (
+										<span class="text-white/75 text-xs text-right block max-w-[16ch]">{(cell as { text: string }).text}</span>
+									) : null}
+								</dd>
+							</div>
+						);
+					})}
+				</dl>
+			</div>
+		))}
+	</div>
+</div>

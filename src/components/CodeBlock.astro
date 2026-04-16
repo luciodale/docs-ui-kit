@@ -9,18 +9,128 @@ type Props = {
 
 const { code, language = "tsx", filename } = Astro.props;
 const trimmed = code.trim();
+
+const elegantMono = {
+	name: "elegant-mono",
+	type: "dark",
+	colors: {
+		"editor.background": "#111113",
+		"editor.foreground": "#e4e4e7",
+	},
+	tokenColors: [
+		{
+			scope: ["comment", "punctuation.definition.comment", "string.comment"],
+			settings: { foreground: "#6b6b72", fontStyle: "italic" },
+		},
+		{
+			scope: [
+				"keyword",
+				"keyword.control",
+				"keyword.operator.new",
+				"storage.type",
+				"storage.modifier",
+				"keyword.declaration",
+				"keyword.other.import",
+				"keyword.other.export",
+			],
+			settings: { foreground: "#ef4723", fontStyle: "" },
+		},
+		{
+			scope: ["string", "string.quoted", "string.template", "string.regexp"],
+			settings: { foreground: "#fbbf78" },
+		},
+		{
+			scope: [
+				"constant.numeric",
+				"constant.language",
+				"constant.other",
+				"support.constant",
+			],
+			settings: { foreground: "#f7a878" },
+		},
+		{
+			scope: [
+				"entity.name.function",
+				"support.function",
+				"meta.function-call entity.name.function",
+				"meta.method entity.name.function",
+			],
+			settings: { foreground: "#f5f5f5" },
+		},
+		{
+			scope: [
+				"entity.name.type",
+				"entity.name.class",
+				"support.type",
+				"storage.type.built-in",
+			],
+			settings: { foreground: "#d4d4d8" },
+		},
+		{
+			scope: [
+				"entity.name.tag",
+				"entity.name.tag.jsx",
+				"entity.name.tag.html",
+				"entity.name.tag.html.jsx",
+			],
+			settings: { foreground: "#d4d4d8", fontStyle: "" },
+		},
+		{
+			scope: [
+				"support.class.component",
+				"support.class.component.jsx",
+				"support.class.component.tsx",
+			],
+			settings: { foreground: "#e29279", fontStyle: "" },
+		},
+		{
+			scope: [
+				"entity.other.attribute-name",
+				"entity.other.attribute-name.jsx",
+				"entity.other.attribute-name.tsx",
+			],
+			settings: { foreground: "#a1a1aa" },
+		},
+		{
+			scope: [
+				"variable",
+				"variable.other",
+				"variable.parameter",
+				"meta.object-literal.key",
+				"meta.definition.variable",
+			],
+			settings: { foreground: "#e4e4e7" },
+		},
+		{
+			scope: ["punctuation", "meta.brace", "meta.delimiter"],
+			settings: { foreground: "#71717a" },
+		},
+		{
+			scope: ["keyword.operator"],
+			settings: { foreground: "#a1a1aa" },
+		},
+		{
+			scope: ["invalid"],
+			settings: { foreground: "#ef4444" },
+		},
+	],
+} as const;
+
 const html = await codeToHtml(trimmed, {
 	lang: language,
-	theme: "vitesse-dark",
+	theme: elegantMono,
 });
 ---
 
-<div class="rounded-lg border border-white/10 bg-[#161618] overflow-hidden my-4">
-	<div class="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] bg-white/[0.02]">
-		<span class="text-xs text-white/40 font-mono">{filename ?? language}</span>
+<div class="rounded-lg border border-white/10 bg-[#111113] overflow-hidden my-4">
+	<div class="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] bg-white/[0.015]">
+		<span class="flex items-center gap-2 text-xs text-white/55 font-mono">
+			<span class="inline-block w-1.5 h-1.5 rounded-full bg-accent" aria-hidden="true"></span>
+			{filename ?? language}
+		</span>
 		<button
 			type="button"
-			class="copy-btn text-xs text-white/40 hover:text-white/70 transition-colors cursor-pointer"
+			class="copy-btn text-xs text-white/40 hover:text-accent transition-colors cursor-pointer"
 			data-code={trimmed}
 		>
 			<span class="copy-label">Copy</span>

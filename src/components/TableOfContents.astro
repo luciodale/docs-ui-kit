@@ -3,8 +3,15 @@
 // No props needed.
 ---
 
-<nav id="toc" class="w-44 shrink-0 hidden xl:block sticky top-16 h-[calc(100dvh-4rem)] pt-8 pr-4 overflow-y-auto">
-	<div class="text-xs font-semibold uppercase tracking-widest text-white/40 mb-3">On this page</div>
+<nav
+	id="toc"
+	class="w-56 shrink-0 hidden xl:block sticky top-16 h-[calc(100dvh-4rem)] pt-8 pr-4 overflow-y-auto"
+>
+	<div
+		class="text-xs font-semibold uppercase tracking-widest text-white/40 mb-3"
+	>
+		On this page
+	</div>
 	<ul id="toc-list" class="flex flex-col gap-0.5"></ul>
 </nav>
 
@@ -44,8 +51,14 @@
 					const id = entry.target.id;
 					for (const link of links) {
 						const isActive = link.getAttribute("href") === `#${id}`;
-						link.className = isActive ? ACTIVE_CLASS : INACTIVE_CLASS;
-						if (isActive) link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+						link.className = isActive
+							? ACTIVE_CLASS
+							: INACTIVE_CLASS;
+						if (isActive)
+							link.scrollIntoView({
+								block: "nearest",
+								behavior: "smooth",
+							});
 					}
 				}
 			},
