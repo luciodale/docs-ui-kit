@@ -20,18 +20,24 @@ type BreadcrumbItem = {
 	item: string;
 };
 
+function withCanonicalSlash(path: string): string {
+	return path.endsWith("/") ? path : `${path}/`;
+}
+
 /**
  * Builds canonical URL from a relative path and siteUrl.
  * The relative path should already have the base stripped via `stripBasePath`.
+ * Always emits a trailing slash so the canonical matches Astro's served URLs.
  */
 export function buildCanonicalUrl(relativePath: string, siteUrl: string): string {
 	const baseUrl = siteUrl.endsWith("/") ? siteUrl : `${siteUrl}/`;
-	return new URL(relativePath.replace(/^\//, ""), baseUrl).href;
+	const withSlash = withCanonicalSlash(relativePath);
+	return new URL(withSlash.replace(/^\//, ""), baseUrl).href;
 }
 
 /**
  * Builds JSON-LD breadcrumb items from a relative path.
- * Returns null for the root path.
+ * Returns null for the root path. Item URLs always end with a trailing slash.
  */
 export function buildBreadcrumbs(relativePath: string, siteUrl: string): BreadcrumbItem[] | null {
 	if (relativePath === "/") return null;
@@ -41,6 +47,6 @@ export function buildBreadcrumbs(relativePath: string, siteUrl: string): Breadcr
 		"@type": "ListItem" as const,
 		position: i + 1,
 		name: segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-		item: new URL(arr.slice(0, i + 1).join("/"), baseUrl).href,
+		item: new URL(`${arr.slice(0, i + 1).join("/")}/`, baseUrl).href,
 	}));
 }

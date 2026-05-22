@@ -40,9 +40,15 @@ describe("stripBasePath", () => {
 });
 
 describe("buildCanonicalUrl", () => {
-	test("builds correct URL from relative path", () => {
+	test("builds correct URL with trailing slash from relative path", () => {
 		expect(buildCanonicalUrl("/docs/undelivered-sync", SITE_URL)).toBe(
-			"https://koolcodez.com/projects/react-socket/docs/undelivered-sync",
+			"https://koolcodez.com/projects/react-socket/docs/undelivered-sync/",
+		);
+	});
+
+	test("preserves trailing slash if relative path already has one", () => {
+		expect(buildCanonicalUrl("/docs/undelivered-sync/", SITE_URL)).toBe(
+			"https://koolcodez.com/projects/react-socket/docs/undelivered-sync/",
 		);
 	});
 
@@ -52,7 +58,7 @@ describe("buildCanonicalUrl", () => {
 
 	test("builds correct URL with siteUrl trailing slash", () => {
 		expect(buildCanonicalUrl("/docs/api", `${SITE_URL}/`)).toBe(
-			"https://koolcodez.com/projects/react-socket/docs/api",
+			"https://koolcodez.com/projects/react-socket/docs/api/",
 		);
 	});
 
@@ -63,13 +69,13 @@ describe("buildCanonicalUrl", () => {
 
 	test("handles nested paths", () => {
 		expect(buildCanonicalUrl("/demo/chat-room", SITE_URL)).toBe(
-			"https://koolcodez.com/projects/react-socket/demo/chat-room",
+			"https://koolcodez.com/projects/react-socket/demo/chat-room/",
 		);
 	});
 
 	test("works with no-base site (root domain)", () => {
 		expect(buildCanonicalUrl("/docs/api", "https://example.com")).toBe(
-			"https://example.com/docs/api",
+			"https://example.com/docs/api/",
 		);
 	});
 });
@@ -79,20 +85,20 @@ describe("buildBreadcrumbs", () => {
 		expect(buildBreadcrumbs("/", SITE_URL)).toBeNull();
 	});
 
-	test("builds correct items for docs page", () => {
+	test("builds correct items for docs page with trailing slash URLs", () => {
 		const items = buildBreadcrumbs("/docs/undelivered-sync", SITE_URL);
 		expect(items).toHaveLength(2);
 		expect(items?.[0]).toEqual({
 			"@type": "ListItem",
 			position: 1,
 			name: "Docs",
-			item: "https://koolcodez.com/projects/react-socket/docs",
+			item: "https://koolcodez.com/projects/react-socket/docs/",
 		});
 		expect(items?.[1]).toEqual({
 			"@type": "ListItem",
 			position: 2,
 			name: "Undelivered Sync",
-			item: "https://koolcodez.com/projects/react-socket/docs/undelivered-sync",
+			item: "https://koolcodez.com/projects/react-socket/docs/undelivered-sync/",
 		});
 	});
 
@@ -117,7 +123,7 @@ describe("buildBreadcrumbs", () => {
 			"@type": "ListItem",
 			position: 1,
 			name: "Docs",
-			item: "https://koolcodez.com/projects/react-socket/docs",
+			item: "https://koolcodez.com/projects/react-socket/docs/",
 		});
 	});
 });
@@ -129,7 +135,7 @@ describe("end-to-end: stripBasePath + buildCanonicalUrl", () => {
 		const currentPath = "/projects/react-socket/docs/undelivered-sync";
 		const relative = stripBasePath(currentPath, basePath);
 		const canonical = buildCanonicalUrl(relative, SITE_URL);
-		expect(canonical).toBe("https://koolcodez.com/projects/react-socket/docs/undelivered-sync");
+		expect(canonical).toBe("https://koolcodez.com/projects/react-socket/docs/undelivered-sync/");
 	});
 
 	test("full pipeline produces correct canonical for root", () => {
@@ -146,6 +152,6 @@ describe("end-to-end: stripBasePath + buildCanonicalUrl", () => {
 		expect(items).toHaveLength(2);
 		expect(items?.[0].name).toBe("Demo");
 		expect(items?.[1].name).toBe("Chat Room");
-		expect(items?.[1].item).toBe("https://koolcodez.com/projects/react-socket/demo/chat-room");
+		expect(items?.[1].item).toBe("https://koolcodez.com/projects/react-socket/demo/chat-room/");
 	});
 });
